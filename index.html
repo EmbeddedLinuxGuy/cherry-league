@@ -19,9 +19,15 @@
 	    }
         };
     };
+
+/// XXX click handling should be either a single
+/// event handler on the table, or a closure over tds
+
     var tds;
+
     window.onload = () => {
-        tds = document.getElementsByTagName("td");
+	var table = document.getElementById("diamond");
+	tds = table.getElementsByTagName("td");
 	for (var i=0; i < tds.length; ++i) {
 	    tds[i].onclick = mkHandler(i);
 	    tds[i].appendChild(document.createElement("img"));
@@ -36,6 +42,13 @@ function setImg(pos, url, name) {
 
     img.src = url;
     span.innerHTML = "<br />" + name;
+
+    var roster = document.getElementById("roster");
+    var docfrag = document.createDocumentFragment();
+    var li = document.createElement("li");
+    li.textContent = name;
+    docfrag.appendChild(li);
+    roster.appendChild(docfrag);
 };
 
 var positions = [ "lf", "cf", "rf",
@@ -63,8 +76,14 @@ function changeTeam(event, team) {
 	var lineup = JSON.parse(r.responseText);
 	var i, j;
 	for (i=j=0; i < positions.length; ++i) {
-	    while (normalize_position(lineup.names[j++]) !== positions[i]);
-	    setImg(positions[i] + " " + team, lineup.urls[j-1], lineup.players[j-1]);
+	    while (j < lineup.names.length && normalize_position(lineup.names[j]) !== positions[i]) {
+		++j;
+	    }
+	    if (j === lineup.names.length) {
+		alert("Could not find [" + positions[i] + "]" + " for team [" + team + "]");
+	    } else {
+		setImg(positions[i] + " " + team, lineup.urls[j], lineup.players[j]);
+	    }
 	}
     };
     r.send();
@@ -144,7 +163,14 @@ function changeTeam(event, team) {
       </select>
     </form>
 
-    <table>
+<!-- top level table] -->
+ <table>
+  <tr>
+   <td>
+
+    <!-- left side: diamond -->
+
+    <table id="diamond">
       <tr>
 	<td></td>
 	<td colspan=2>
@@ -221,5 +247,16 @@ function changeTeam(event, team) {
       </tr>
 
     </table>
+
+    </td>
+    <!-- right side: roster -->
+    <td>
+
+    <ul id="roster">
+    </ul>
+
+     </td>
+    </tr>
+   </table>
   </body>
 </html>
