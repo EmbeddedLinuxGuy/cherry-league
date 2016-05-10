@@ -1,0 +1,19 @@
+11 move mlb-*.json files to data dir
+ 9 if mlb-player.json not present, download
+10 fix uncached image download to avoid refresh
+ 8 store json in Postgres
+12 automated stat updates
+13 add mkdir directories png/ etc to init script
+
+done
+
+ 3 for each active player, fetch game logs
+ 4 for each active player, calculate ops
+ 6 why is mlb-tb not working
+ 1 get rid of td select bug
+ 2 import stats
+  
+wontfix
+
+ 7 use roster instead of players
+ 5 fetch list of teams from Stattleship

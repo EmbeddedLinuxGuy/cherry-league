@@ -14,7 +14,12 @@ name=jose-bautista
 rm mlb-$team-players*.json
 
 # for each player in the game roster, return ops
-const stats = import("./stats");
+const stats = require("./stats");
 const filename = make_filename();
-// user needs to save roster.json to filename
+// user needs to save roster.json to filename, eg
+fs.writeFile(filename, JSON.stringify([
+   {"n": "J. Bautista", "t": "tor"},
+   {"n": "D. Ortiz", "t": "bos"}
+]));
+// {"J. Bautista": .8, "D. Ortiz": 1.11112 }
 const ops_table = stats.fetch(filename);
