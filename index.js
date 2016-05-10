@@ -1,8 +1,10 @@
 const http = require("http");
 const fs = require("fs");
+const spawn = require("child_process").spawn;
 const __ = require("lodash");
 var cheerio = require("cheerio");
 const fetch = require("./fetch");
+const stats = require("./stats");
 
 // Singleton configuration object
 // XXX race condition if used before initialized
@@ -12,6 +14,10 @@ fs.readFile("config.json", "utf8", (e, d) => {
     z = JSON.parse(d);
     console.log(z);
 });
+
+var make_filename = () => {
+    return "saves/"+Math.random().toString().substr(2)+".json";
+};
 
 var html_to_json = (res, d) => {
     res.writeHead(200, {"Content-Type": "text/json"});
@@ -87,6 +93,37 @@ http.createServer((req, res) => {
 	    } else {
 		html_to_json(res, d);
 	    }
+	});
+    } else if (match = path.match(/^[a-z]+\.png$/)) {
+	var datafile = "png/" + match[0];
+	fs.readFile(datafile, function (e, d) {
+	    if (e) {
+		console.log(e);
+		res.writeHead(404, {});
+		res.end();
+	    } else {
+		res.writeHead(200, {"Content-Type": "image/png"});
+		res.end(d);
+	    }
+	});
+    } else if (match = path.match(/^roster\//)) {
+	var json = decodeURIComponent(path.substr(7));
+	fs.open(make_filename(), "w+", (e, fd) => {
+	    if (e) throw e;
+	    fs.write(fd, json);
+	    fs.close(fd);
+	    res.end(JSON.stringify({"ok":"ok"}));
+	});
+    } else if (match = path.match(/^stats\//)) {
+	var json = decodeURIComponent(path.substr("stats/".length));
+	var filename = make_filename();
+	fs.open(filename, "w+", (e, fd) => {
+	    if (e) throw e;
+	    fs.write(fd, json);
+	    fs.close(fd);
+	    var ops = stats.fetch(filename);
+	    console.log(ops);
+	    res.end(ops);
 	});
     } else {
 	console.log("Bad request: ["+ path +"]");

@@ -1,54 +1,133 @@
 <!doctype html>
 <style>
-  td {
-  font-size: 60%;
+  img.rating {
+  left: -19px;
+  position: relative;
+  height: 20px;
   }
+
+table {
+    font-family: sans-serif;
+    border-collapse: collapse;
+}
+
+tr.border {
+    border: 1px solid black;
+}
+
 </style>
 <html>
   <head>
     <script>
-    var draft = (pos)=>{
-	var elt = document.getElementsByClassName(t)[0];
-	elt.style = "display: none";
-    };
-    var mkHandler = (i) => {
-	return (ev) => {
-	    t = tds[i].className;
-	    if (t !== undefined && t.length > 0) {
-		draft(t);
-	    }
-        };
+    var drafted = 0;
+    var POS_TEAM = 0;
+    var tableHandler = (ev) => {
+	var td = ev.srcElement.parentElement;
+	// should ignore this if not a td
+	var pos = td.className.substr(0,td.className.length-1);
+	var team = td.className.substr(-1,1);
+	team = (team === "a") ? "h" : "a";
+	var elts = document.getElementsByClassName(pos+team);
+	elts[0].style = "display:none";
+	elts[1].style = "display:none";
+	if (++drafted === 8) {
+	    document.getElementById("diamond").onclick = null;
+	    var r = new XMLHttpRequest();
+	    var roster = rows.filter((r)=>document.getElementsByClassName(r[POS_TEAM])[1].style.display === "").map((e)=>{return {n:e[1],t:team_names[e[0].substr(e[0].length-1,1)]}});
+	    console.log(roster);
+	    r.open("GET", "/roster/" + JSON.stringify(roster), true);
+	    r.onreadystatechange = () => {
+		console.log("STATE CHANGE " + r.readyState + "][" + r.status);
+		if (r.readyState != 4 || r.status != 200) return;
+		document.getElementById("msg").innerHTML = "Your Team has been Drafted!";
+	    };
+	    r.send();
+
+	    console.log("Sent draft message");
+//	    r.send(JSON.stringify(rows.filter((r)=>document.getElementsByClassName(r[POS_TEAM])[1].style.display === "").map((e)=>{return {n:e[1],t:e[0].substr(e[0].length-1,1)}})));
+
+	}
     };
 
-/// XXX click handling should be either a single
-/// event handler on the table, or a closure over tds
-
-    var tds;
+var getOBP = (name) => {
+//    return ops_table[name];
+return "." + (200 + 50 * name.length); // not used
+    };
 
     window.onload = () => {
 	var table = document.getElementById("diamond");
+	table.onclick = tableHandler;
 	tds = table.getElementsByTagName("td");
 	for (var i=0; i < tds.length; ++i) {
-	    tds[i].onclick = mkHandler(i);
+	    tds[i].appendChild(document.createElement("img"));
 	    tds[i].appendChild(document.createElement("img"));
 	    tds[i].appendChild(document.createElement("span"));
 	}
     };
 
-function setImg(pos, url, name) {
-    var td = document.getElementsByClassName(pos)[0];
-    var img = td.firstChild;
-    var span = img.nextSibling;
+var rows = [];
 
+var setIcon = (pos, obp_str) => {
+    var td = document.getElementsByClassName(pos)[0]; // make sure this is td not tr
+    var img = td.firstChild.nextSibling;
+
+    var obp = parseFloat(obp_str);
+    img.src = obp >= .9 ? "cherry.png"
+	: obp >= .8333 ? "love.png"
+	: obp >= .7667 ? "good.png"
+	: obp >= .7000 ? "happysmirk.png"
+	: obp >= .6334 ? "unamused.png"
+	: obp >= .5667 ? "sweat.png"
+	: "poo.png";
+    img.classList = "rating";
+};
+
+var setImg = (pos, url, name) => {
+    var td = document.getElementsByClassName(pos)[0]; // make sure this is td not tr
+    var img = td.firstChild;
+    var img2 = img.nextSibling;
+    var span = img2.nextSibling;
+
+    var obp_str = getOBP(name);
+    var obp = parseFloat(obp_str);
     img.src = url;
+    img2.src = obp >= .9 ? "cherry.png"
+	: obp >= .8333 ? "love.png"
+	: obp >= .7667 ? "good.png"
+	: obp >= .7000 ? "happysmirk.png"
+	: obp >= .6334 ? "unamused.png"
+	: obp >= .5667 ? "sweat.png"
+	: "poo.png";
+    img2.classList = "rating";
     span.innerHTML = "<br />" + name;
 
+    rows.push([pos, name, obp_str]);
+};
+
+var displayRoster = (players) => {
     var roster = document.getElementById("roster");
-    var docfrag = document.createDocumentFragment();
-    var li = document.createElement("li");
-    li.textContent = name;
-    docfrag.appendChild(li);
-    roster.appendChild(docfrag);
+
+    var i;
+    players = players.sort((x, y) => {return parseFloat(y[2])-parseFloat(x[2]);});
+    for (i=0; i < players.length; ++i) {
+	var docfrag = document.createDocumentFragment();
+	var tr = document.createElement("tr");
+	//	tr.addClass(players[i][1]);
+	tr.classList = players[i][0] + " border";
+	var td = document.createElement("td");
+
+	td = document.createElement("td");
+	td.textContent = players[i][1]; // name
+	tr.appendChild(td);
+
+	td = document.createElement("td");
+	var fmt = (n) => n<1?n.toFixed(3).substr(1):n.toFixed(3);
+	td.textContent = fmt(players[i][2]); // OPS
+	tr.appendChild(td);
+
+	docfrag.appendChild(tr);
+	roster.appendChild(docfrag);
+    }
 };
 
 var positions = [ "lf", "cf", "rf",
@@ -64,17 +143,17 @@ var normalize_position = (position) => {
     return position.split(" ").map((s)=>s.substr(0,1)).join("").toLowerCase();
 }
 
+var team_names = {};
+var ops_table;
+
 function changeTeam(event, team) {
+    team_names[team] = event.target.value;
     var r = new XMLHttpRequest();
 
     r.open("GET", "/" + event.target.value, true);
     r.onreadystatechange = function () {
-        if (r.readyState != 4 || r.status != 200) {
-            return;
-	}
-
-	var lineup = JSON.parse(r.responseText);
-	var i, j;
+        if (r.readyState != 4 || r.status != 200) return;
+	var i, j, lineup = JSON.parse(r.responseText);
 	for (i=j=0; i < positions.length; ++i) {
 	    while (j < lineup.names.length && normalize_position(lineup.names[j]) !== positions[i]) {
 		++j;
@@ -84,6 +163,23 @@ function changeTeam(event, team) {
 	    } else {
 		setImg(positions[i] + " " + team, lineup.urls[j], lineup.players[j]);
 	    }
+	}
+
+	if (team === "h") {
+	    var stats_req = new XMLHttpRequest();
+	    var roster = rows.map((e)=>{return {n:e[1],t:team_names[e[0].substr(e[0].length-1,1)]}});
+	    console.log(roster);
+	    stats_req.open("GET", "/stats/" + JSON.stringify(roster), true);
+	    stats_req.onreadystatechange = () => {
+		console.log("STATE CHANGE " + stats_req.readyState + "-" + stats_req.status);
+		if (stats_req.readyState != 4 || stats_req.status != 200) return;
+//		document.getElementById("msg").innerHTML = stats_req.responseText;
+		ops_table = JSON.parse(stats_req.responseText);
+		rows.forEach((e)=>e[2] = ops_table[e[1]]);
+		rows.forEach((e)=>setIcon(e[0], ops_table[e[1]]));
+		displayRoster(rows);
+	    };
+	    stats_req.send();
 	}
     };
     r.send();
@@ -166,7 +262,7 @@ function changeTeam(event, team) {
 <!-- top level table] -->
  <table>
   <tr>
-   <td>
+    <td style="font-size: x-small;">
 
     <!-- left side: diamond -->
 
@@ -250,10 +346,12 @@ function changeTeam(event, team) {
 
     </td>
     <!-- right side: roster -->
-    <td>
+    <td style="vertical-align:text-top;font-size: large;">
 
-    <ul id="roster">
-    </ul>
+    <span id="msg"></span>
+    <table>
+     <tbody id="roster"></tbody>
+    </table>
 
      </td>
     </tr>

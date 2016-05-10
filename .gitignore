@@ -1,5 +1,9 @@
 *~
 node_modules
-teams
+teams/
 img/
 config.json
+mlb-*.json
+*.bak
+*.bak.2
+.token
