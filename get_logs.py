@@ -16,10 +16,12 @@ with open(".token", "r") as infile:
 s = Stattleship()
 Token = s.set_token(token)
 
+data_dir = "data/"
+
 if "mlb-" in slug:
     ep = "game_logs"
     Output = s.ss_get_results(sport="baseball", league="mlb", ep=ep, player_id=slug)
-    with open(slug+"-"+ep+".json", "w") as outfile:
+    with open(data_dir+slug+"-"+ep+".json", "w") as outfile:
         json.dump(Output, outfile)
 else:
     slug = "mlb-" + slug
@@ -29,7 +31,7 @@ else:
     empty = [{'players': []}]
     max_pages = 10
     while Output != empty and page <= max_pages:
-        with open(slug+"-"+ep+str(page)+".json", "w") as outfile:
+        with open(data_dir+slug+"-"+ep+str(page)+".json", "w") as outfile:
             json.dump(Output, outfile)
         page += 1
         Output = s.ss_get_results(sport="baseball", league="mlb", ep=ep, team_id=slug, page=page)

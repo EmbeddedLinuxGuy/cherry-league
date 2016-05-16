@@ -5,7 +5,7 @@ var team = process.argv[2];
 const fs = require("fs");
 const spawn = require("child_process").spawn;
 
-var data = fs.readFileSync("mlb-"+team+"-master.json", "utf8");
+var data = fs.readFileSync("data/mlb-"+team+"-master.json", "utf8");
 var players;
 
 try {

@@ -5,6 +5,7 @@ img/
 png/
 saves/
 png/
+data/
 config.json
 
 mlb-*.json

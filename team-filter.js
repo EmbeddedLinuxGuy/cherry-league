@@ -2,7 +2,8 @@
 
 var fs = require("fs");
 
-var team = "mlb-" + process.argv[2];
+var data_dir = "data";
+var team = data_dir+"/"+"mlb-" + process.argv[2];
 var ep = "players";
 var page = 1;
 var data;

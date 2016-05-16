@@ -2,11 +2,10 @@
 
 var fs = require("fs");
 var __ = require("lodash");
-
-//var roster_file = process.argv[2];
+var data_dir = "data";
 
 var get_ops =  (slug) => {
-    var data = fs.readFileSync(slug+"-game_logs.json", "utf8");
+    var data = fs.readFileSync(data_dir+"/"+slug+"-game_logs.json", "utf8");
     var games;
     try {
 	games = JSON.parse(data)[0].game_logs;
@@ -46,8 +45,9 @@ module.exports = {
 	    console.log("Parsing roster");
 	    roster = JSON.parse(fs.readFileSync(roster_file));
 	    console.log("ROSTER OK");
-	    __.uniq(roster.map((e)=>e.t)).forEach((t)=>teams[t]=JSON.parse(fs.readFileSync("mlb-"+t+"-master.json", "utf8")));
+	    __.uniq(roster.map((e)=>e.t)).forEach((t)=>teams[t]=JSON.parse(fs.readFileSync(data_dir+"/"+"mlb-"+t+"-master.json", "utf8")));
 	} catch (e) {
+	    console.log("ALERT " + data_dir+"/"+"mlb-"+t+"-master.json not found");
 	    throw e;
 	    process.exit(1);
 	}

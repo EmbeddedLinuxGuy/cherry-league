@@ -1,12 +1,12 @@
-11 move mlb-*.json files to data dir
  9 if mlb-player.json not present, download
 10 fix uncached image download to avoid refresh
  8 store json in Postgres
-12 automated stat updates
+12 automated stat and lineup updates
 13 add mkdir directories png/ etc to init script
 
 done
 
+11 move mlb-*.json files to data dir
  3 for each active player, fetch game logs
  4 for each active player, calculate ops
  6 why is mlb-tb not working
