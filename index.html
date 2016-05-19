@@ -88,20 +88,10 @@ var setImg = (pos, url, name) => {
     var img2 = img.nextSibling;
     var span = img2.nextSibling;
 
-    var obp_str = getOBP(name);
-    var obp = parseFloat(obp_str);
     img.src = url;
-    img2.src = obp >= .9 ? "cherry.png"
-	: obp >= .8333 ? "love.png"
-	: obp >= .7667 ? "good.png"
-	: obp >= .7000 ? "happysmirk.png"
-	: obp >= .6334 ? "unamused.png"
-	: obp >= .5667 ? "sweat.png"
-	: "poo.png";
-    img2.classList = "rating";
     span.innerHTML = "<br />" + name;
 
-    rows.push([pos, name, obp_str]);
+    rows.push([pos, name, ".000"]);
 };
 
 var displayRoster = (players) => {

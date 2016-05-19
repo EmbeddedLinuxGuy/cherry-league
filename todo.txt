@@ -1,11 +1,13 @@
+15 download single day of game logs
  9 if mlb-player.json not present, download
 10 fix uncached image download to avoid refresh
- 8 store json in Postgres
 12 automated stat and lineup updates
+ 8 store json in Postgres
 13 add mkdir directories png/ etc to init script
 
 done
 
+14 remove setIcon functionality from setImg
 11 move mlb-*.json files to data dir
  3 for each active player, fetch game logs
  4 for each active player, calculate ops
