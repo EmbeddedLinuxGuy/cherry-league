@@ -4,17 +4,66 @@ var fs = require("fs");
 var __ = require("lodash");
 var data_dir = "data";
 
-var get_ops =  (slug) => {
-    var data = fs.readFileSync(data_dir+"/"+slug+"-game_logs.json", "utf8");
-    var games;
-    try {
-	games = JSON.parse(data)[0].game_logs;
-    } catch (e) {
-	// XXX don't blow up on bad (client-originated) json
-	throw e;
+var all_games;
+
+var load_game_logs = () => {
+    var dates = ["2016-05-06", "2016-05-07", "2016-05-08"];
+    for (var d=0; d < dates.length; ++d) {
+	for (var i=1; i < 20; ++i) {
+	    var data;
+	    try {
+		data = fs.readFileSync("data/" +
+				       dates[d] + "-" + i + ".json",
+				       "utf8");
+	    } catch (e) {
+		console.log("   found [" + (i-1) +"] pages.");
+		break;
+	    }
+
+	    var new_games = JSON.parse(data)[0];
+	    if (all_games === undefined) {
+		all_games = new_games;
+	    } else {
+		for (p in new_games) {
+		    if (new_games.hasOwnProperty(p)) {
+			Array.prototype.push.apply(all_games[p], new_games[p]);
+		    }
+		}
+	    }
+	}
     }
-//    return games[0].on_base_plus_slugging;
-    // XXX not used
+};
+
+var get_ops = (slug) => {
+    if (all_games === undefined) {
+	load_game_logs();
+	for (var p in all_games) {
+	    if (all_games.hasOwnProperty(p)) {
+		console.log(p);
+		console.log(all_games[p].length);
+	    }
+	}
+    }
+
+    var get_player_id = (slug) => {
+	var p = all_games.players.filter((p)=>p.slug===slug);
+	if (p.length === 0) {
+	    console.log("Player not found: [" + slug + "]");
+	    return 0;
+	} else if (p.length === 1) {
+	    return p[0].id;
+	} else {
+	    console.log("Found "+p.length+" player ids for [" + slug + "]");
+	    return p[0].id;
+	}
+    };
+    var player_id = get_player_id(slug);
+    if (player_id === 0) { return 0; }
+    var games = all_games.game_logs.filter((g)=>g.player_id===player_id);
+    if (games.length === 0) {
+	console.log("Found NO games for " + slug + ", " + player_id);
+	return 0;
+    }
 
     var totals = {};
     var hits = games.map((g)=>g.hits).reduce((a,b)=>a+b);
@@ -45,9 +94,10 @@ module.exports = {
 	    console.log("Parsing roster");
 	    roster = JSON.parse(fs.readFileSync(roster_file));
 	    console.log("ROSTER OK");
+
 	    __.uniq(roster.map((e)=>e.t)).forEach((t)=>teams[t]=JSON.parse(fs.readFileSync(data_dir+"/"+"mlb-"+t+"-master.json", "utf8")));
 	} catch (e) {
-	    console.log("ALERT " + data_dir+"/"+"mlb-"+t+"-master.json not found");
+	    console.log("ALERT mlb-$TEAM-master.json not found");
 	    throw e;
 	    process.exit(1);
 	}
@@ -55,12 +105,13 @@ module.exports = {
 	var obj = {};
 	roster.forEach((p) => {
 	    var player = teams[p.t].filter((m)=>m.first_name.substr(0,1)+". "+m.last_name === p.n)[0];
-	    if (player === undefined) console.log("NO MATCH FOR " + p.n);
-	    obj[p.n] = get_ops(player.slug);
-//	    else return { "name": p.n, "ops": get_ops(player.slug) };
+	    if (player === undefined) {
+		console.log("NO MATCH FOR " + p.n);
+		obj[p.n] = -1;
+	    } else {
+		obj[p.n] = get_ops(player.slug);
+	    }
 	});
 	return JSON.stringify(obj);
     }
 };
-
-

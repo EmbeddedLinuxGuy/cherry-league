@@ -111,7 +111,7 @@ var displayRoster = (players) => {
 	tr.appendChild(td);
 
 	td = document.createElement("td");
-	var fmt = (n) => n<1?n.toFixed(3).substr(1):n.toFixed(3);
+	var fmt = (n) => n<1?(n<0?"none":n.toFixed(3).substr(1)):n.toFixed(3);
 	td.textContent = fmt(players[i][2]); // OPS
 	tr.appendChild(td);
 
