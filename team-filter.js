@@ -12,7 +12,7 @@ var new_players;
 
 new_players = JSON.parse(fs.readFileSync(team+"-"+ep+page+".json"))[0].players;
 while (new_players.length > 0) {
-    Array.prototype.push.apply(players, new_players.filter((e)=>e.active||e.name==="Jacoby Ellsbury"));
+    Array.prototype.push.apply(players, new_players.filter((e)=>e.active||e.name==="Jacoby Ellsbury"||e.name==="Angel Pagan"||e.name==="Wil Myers"));
     ++page;
     try {
 	new_players = JSON.parse(fs.readFileSync(team+"-"+ep+page+".json"))[0].players;
