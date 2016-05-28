@@ -67,18 +67,19 @@ return "." + (200 + 50 * name.length); // not used
 
 var rows = [];
 
-var setIcon = (pos, obp_str) => {
+var setIcon = (pos, ops_str) => {
     var td = document.getElementsByClassName(pos)[0]; // make sure this is td not tr
     var img = td.firstChild.nextSibling;
 
-    var obp = parseFloat(obp_str);
-    img.src = obp >= .9 ? "cherry.png"
-	: obp >= .8333 ? "love.png"
-	: obp >= .7667 ? "good.png"
-	: obp >= .7000 ? "happysmirk.png"
-	: obp >= .6334 ? "unamused.png"
-	: obp >= .5667 ? "sweat.png"
-	: "poo.png";
+    var ops = parseFloat(ops_str);
+    img.src = ops >= .9 ? "cherry.png"
+	: ops >= .8333 ? "love.png"
+	: ops >= .7667 ? "good.png"
+	: ops >= .7000 ? "happysmirk.png"
+	: ops >= .6334 ? "unamused.png"
+	: ops >= .5667 ? "sweat.png"
+	: ops >= 0 ? "poo.png"
+	: "qs.png";
     img.classList = "rating";
 };
 

@@ -1,5 +1,3 @@
-19 display -1 OPS as a ?
-
 17 update starting lineups / depth chart
  9 if mlb-player.json not present, download
 10 fix uncached image download to avoid refresh
@@ -10,6 +8,7 @@
 
 done
 
+19 display -1 OPS as a ?
 18 if a player is not an active slug, return -1
 16 build player stats from db of dated gamelogs
 15 download single day of game logs

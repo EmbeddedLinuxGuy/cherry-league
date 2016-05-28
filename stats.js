@@ -97,7 +97,7 @@ module.exports = {
 
 	    __.uniq(roster.map((e)=>e.t)).forEach((t)=>teams[t]=JSON.parse(fs.readFileSync(data_dir+"/"+"mlb-"+t+"-master.json", "utf8")));
 	} catch (e) {
-	    console.log("ALERT mlb-$TEAM-master.json not found");
+	    console.log("ALERT mlb-$TEAM-master.json not found or not JSON");
 	    throw e;
 	    process.exit(1);
 	}
