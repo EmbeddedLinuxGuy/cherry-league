@@ -1,13 +1,14 @@
 17 update starting lineups / depth chart
  9 if mlb-player.json not present, download
-10 fix uncached image download to avoid refresh
 12 automated stat and lineup updates
- 8 store json in Postgres
+
+10 fix uncached image download to avoid refresh
 
 13 add mkdir directories png/ etc to init script
 
 done
 
+ 5 fetch list of teams from Stattleship
 19 display -1 OPS as a ?
 18 if a player is not an active slug, return -1
 16 build player stats from db of dated gamelogs
@@ -23,4 +24,4 @@ done
 wontfix
 
  7 use roster instead of players
- 5 fetch list of teams from Stattleship
+ 8 store json in Postgres
