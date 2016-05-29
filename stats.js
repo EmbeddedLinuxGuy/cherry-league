@@ -7,31 +7,20 @@ var data_dir = "data";
 var all_games;
 
 var load_game_logs = () => {
-    var dates = ["2016-05-06", "2016-05-07", "2016-05-08"];
-    for (var d=0; d < dates.length; ++d) {
-	for (var i=1; i < 20; ++i) {
-	    var data;
-	    try {
-		data = fs.readFileSync("data/" +
-				       dates[d] + "-" + i + ".json",
-				       "utf8");
-	    } catch (e) {
-		console.log("   found [" + (i-1) +"] pages.");
-		break;
-	    }
-
-	    var new_games = JSON.parse(data)[0];
-	    if (all_games === undefined) {
-		all_games = new_games;
-	    } else {
-		for (p in new_games) {
-		    if (new_games.hasOwnProperty(p)) {
-			Array.prototype.push.apply(all_games[p], new_games[p]);
-		    }
+    var dates = fs.readdirSync("game_logs/", "utf8");
+    dates.forEach((f) => {
+	var data = fs.readFileSync("game_logs/"+f, "utf8");
+	var new_games = JSON.parse(data)[0];
+	if (all_games === undefined) {
+	    all_games = new_games;
+	} else {
+	    for (p in new_games) {
+		if (new_games.hasOwnProperty(p)) {
+		    Array.prototype.push.apply(all_games[p], new_games[p]);
 		}
 	    }
 	}
-    }
+    });
 };
 
 var get_ops = (slug) => {
@@ -54,6 +43,7 @@ var get_ops = (slug) => {
 	    return p[0].id;
 	} else {
 	    console.log("Found "+p.length+" player ids for [" + slug + "]");
+//	    console.log(p.map((p)=>p.id));
 	    return p[0].id;
 	}
     };
@@ -97,7 +87,7 @@ module.exports = {
 
 	    __.uniq(roster.map((e)=>e.t)).forEach((t)=>teams[t]=JSON.parse(fs.readFileSync(data_dir+"/"+"mlb-"+t+"-master.json", "utf8")));
 	} catch (e) {
-	    console.log("ALERT mlb-$TEAM-master.json not found or not JSON");
+	    console.log("ALERT roster or mlb-$TEAM-master.json not found or not JSON");
 	    throw e;
 	    process.exit(1);
 	}
