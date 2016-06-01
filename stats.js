@@ -24,16 +24,6 @@ var load_game_logs = () => {
 };
 
 var get_ops = (slug) => {
-    if (all_games === undefined) {
-	load_game_logs();
-	for (var p in all_games) {
-	    if (all_games.hasOwnProperty(p)) {
-		console.log(p);
-		console.log(all_games[p].length);
-	    }
-	}
-    }
-
     var get_player_id = (slug) => {
 	var p = all_games.players.filter((p)=>p.slug===slug);
 	if (p.length === 0) {
@@ -84,17 +74,21 @@ module.exports = {
 	    console.log("Parsing roster");
 	    roster = JSON.parse(fs.readFileSync(roster_file));
 	    console.log("ROSTER OK");
-
-	    __.uniq(roster.map((e)=>e.t)).forEach((t)=>teams[t]=JSON.parse(fs.readFileSync(data_dir+"/"+"mlb-"+t+"-master.json", "utf8")));
 	} catch (e) {
-	    console.log("ALERT roster or mlb-$TEAM-master.json not found or not JSON");
+	    console.log("ALERT roster not found or not JSON");
 	    throw e;
-	    process.exit(1);
 	}
 
+	load_game_logs();
+	for (var p in all_games) {
+	    if (all_games.hasOwnProperty(p)) {
+		console.log(p);
+		console.log(all_games[p].length);
+	    }
+	}
 	var obj = {};
 	roster.forEach((p) => {
-	    var player = teams[p.t].filter((m)=>m.first_name.substr(0,1)+". "+m.last_name === p.n)[0];
+	    var player = all_games.players.filter((m)=>m.first_name.substr(0,1)+". "+m.last_name === p.n)[0];
 	    if (player === undefined) {
 		console.log("NO MATCH FOR " + p.n);
 		obj[p.n] = -1;
