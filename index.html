@@ -65,6 +65,7 @@ return "." + (200 + 50 * name.length); // not used
 	}
     };
 
+// global master table
 var rows = [];
 
 var setIcon = (pos, ops_str) => {
@@ -164,8 +165,18 @@ function changeTeam(event, team) {
 	    stats_req.onreadystatechange = () => {
 		console.log("STATE CHANGE " + stats_req.readyState + "-" + stats_req.status);
 		if (stats_req.readyState != 4 || stats_req.status != 200) return;
-//		document.getElementById("msg").innerHTML = stats_req.responseText;
+		//document.getElementById("msg").innerHTML = stats_req.responseText;
 		ops_table = JSON.parse(stats_req.responseText);
+		var start = new Date(ops_table.start);
+		var end = new Date(ops_table.end);
+		document.getElementById("msg").innerHTML
+		    = "Production from "
+		    + start.toLocaleString("en-US", { "month": "short", "day": "numeric", "year": "numeric" })
+		    + " to "
+		    + end.toLocaleString("en-US", { "month": "short", "day": "numeric", "year": "numeric" })
+		;
+		delete ops_table.start;
+		delete ops_table.end;
 		rows.forEach((e)=>e[2] = ops_table[e[1]]);
 		rows.forEach((e)=>setIcon(e[0], ops_table[e[1]]));
 		displayRoster(rows);

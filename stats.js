@@ -6,11 +6,20 @@ var data_dir = "data";
 
 var all_games;
 
+// populate with first and last game dates
+var start = Date.now();
+var end = Date.UTC(0,0); // a long time ago
+
 var load_game_logs = () => {
     var dates = fs.readdirSync("game_logs/", "utf8");
     dates.forEach((f) => {
 	var data = fs.readFileSync("game_logs/"+f, "utf8");
 	var new_games = JSON.parse(data)[0];
+	if (match = f.match(/^(\d{4}-\d\d-\d\d)-\d*\.json$/)) {
+	    var date = new Date(match[1]);
+	    if (date < start) { start = date; }
+	    if (date > end) { end = date; }
+	}
 	if (all_games === undefined) {
 	    all_games = new_games;
 	} else {
@@ -75,6 +84,7 @@ module.exports = {
 	    roster = JSON.parse(fs.readFileSync(roster_file));
 	    console.log("ROSTER OK");
 	} catch (e) {
+	    // XXX fetch roster if needed?
 	    console.log("ALERT roster not found or not JSON");
 	    throw e;
 	}
@@ -96,6 +106,8 @@ module.exports = {
 		obj[p.n] = get_ops(player.slug);
 	    }
 	});
+	obj.start = start;
+	obj.end = end;
 	return JSON.stringify(obj);
     }
 };
